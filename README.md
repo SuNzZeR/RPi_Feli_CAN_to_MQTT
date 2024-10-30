@@ -192,7 +192,7 @@ Ersetze `{Felicity_Nr}` durch die tatsächliche Speicher-Nummer in allen Topics.
 ## HomeAssistant MQTT-Entitäten
 ![HomeAssistant_Entitäten](HomeAssistant_Entitäten.jpg)
 
-HA_MQTT_configuration.yaml#L1-L295
+https://github.com/SuNzZeR/RPi_Feli_CAN_to_MQTT/blob/d2f333b7a8521e8aa84f5f951468f82616b98634/HA_MQTT_configuration.yaml#L1-L150
 
 ## Lizenz
 Dieses Projekt ist unter der MIT-Lizenz lizenziert. Siehe die [LICENSE](LICENSE) Datei für Details.
