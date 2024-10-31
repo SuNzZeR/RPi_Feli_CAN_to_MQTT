@@ -44,6 +44,9 @@ Stelle sicher, dass die Batterie richtig am RPi angeschlossen ist.
 | Pin 7                        | Anschluss L                         |
 | Pin 8                        | Anschluss H                         | 
 
+<p align="center">
+  <img src="Verkabelung.jpg" alt="Verkabelung">
+</p>
 
 ### Installation
 
