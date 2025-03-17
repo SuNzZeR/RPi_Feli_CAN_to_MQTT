@@ -1,11 +1,11 @@
 
-# CAN zu MQTT Schnittstelle für die Felicity LPBA48100-OL
+# CAN zu MQTT Schnittstelle für die Felicity LPBA48xxx
 
 <p align="center">
-  <img src="Felicity_LPBA48100-OL.png" alt="Felicity LPBA48100-OL">
+  <img src="Felicity_LPBA.png" alt="Felicity LPBA48xxx">
 </p>
 
-Dieses Projekt bietet eine Schnittstelle zwischen CAN-Kommunikation und MQTT für den Felicity LPBA48100-OL Speicher. Es ermöglicht dem Speicher, mit einem MQTT-Broker zu kommunizieren, um verschiedene Topics zu veröffentlichen, was eine Fernüberwachung ermöglicht. Zudem unterstützt das Programm die gleichzeitige Auslesung mehrerer parallel angeschlossener Speicher, wodurch es besonders flexibel und skalierbar in größeren Systemen einsetzbar ist.
+Dieses Projekt bietet eine Schnittstelle zwischen CAN-Kommunikation und MQTT für die Felicity LPBA48xxx Speicher. Es ermöglicht dem Speicher, mit einem MQTT-Broker zu kommunizieren, um verschiedene Topics zu veröffentlichen, was eine Fernüberwachung ermöglicht. Zudem unterstützt das Programm die gleichzeitige Auslesung mehrerer parallel angeschlossener Speicher, wodurch es besonders flexibel und skalierbar in größeren Systemen einsetzbar ist.
 
 ## Inhaltsverzeichnis
 - [Übersicht](#übersicht)
