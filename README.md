@@ -63,6 +63,7 @@ sudo apt-get upgrade -y
 ##### Installation von Python3 und der benötigten Bibliotheken
 ```bash
 sudo apt-get install python3
+sudo apt-get install python3-can
 sudo apt-get install python3-paho-mqtt
 ```
 ##### Neustart des RPi
@@ -139,7 +140,8 @@ Füge folgenden Inhalt ein (bitte Pfad anpassen)
 ```bash
 [Unit]
 Description=CAN to MQTT Service for Felicity
-After=network.target
+After=network.target network-online.target
+Wants=network-online.target
 
 [Service]
 ExecStart=/usr/bin/python3 /home/pi/Feli_CAN_to_MQTT/feli_can_to_mqtt.py
