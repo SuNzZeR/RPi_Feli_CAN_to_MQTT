@@ -1,11 +1,11 @@
 
-# CAN zu MQTT Schnittstelle für die Felicity LPBA48xxx
+# CAN zu MQTT Schnittstelle für die Felicity LPBA-Serie
 
 <p align="center">
-  <img src="Felicity_LPBA.png" alt="Felicity LPBA48xxx">
+  <img src="Felicity_LPBA.png" alt="Felicity LPBA">
 </p>
 
-Dieses Projekt bietet eine Schnittstelle zwischen CAN-Kommunikation und MQTT für die Felicity LPBA48xxx Speicher. Es ermöglicht dem Speicher, mit einem MQTT-Broker zu kommunizieren, um verschiedene Topics zu veröffentlichen, was eine Fernüberwachung ermöglicht. Zudem unterstützt das Programm die gleichzeitige Auslesung mehrerer parallel angeschlossener Speicher, wodurch es besonders flexibel und skalierbar in größeren Systemen einsetzbar ist.
+Dieses Projekt bietet eine Schnittstelle zwischen CAN-Kommunikation und MQTT für die Felicity LPBA Speicher. Es ermöglicht dem Speicher, mit einem MQTT-Broker zu kommunizieren, um verschiedene Topics zu veröffentlichen, was eine Fernüberwachung ermöglicht. Zudem unterstützt das Programm die gleichzeitige Auslesung mehrerer parallel angeschlossener Speicher, wodurch es besonders flexibel und skalierbar in größeren Systemen einsetzbar ist.
 
 ## Inhaltsverzeichnis
 - [Übersicht](#übersicht)
@@ -14,7 +14,6 @@ Dieses Projekt bietet eine Schnittstelle zwischen CAN-Kommunikation und MQTT fü
 - [Konfiguration](#konfiguration)
 - [Verwendung](#verwendung)
 - [MQTT-Topics](#mqtt-topics)
-- [HomeAssistant MQTT-Entitäten](#homeassistant-mqtt-entitäten)
 - [Lizenz](#lizenz)
 
 ## Übersicht
@@ -34,6 +33,7 @@ Das Skript liest Daten von dem Speicher über CAN, verarbeitet sie und veröffen
 
 ### Voraussetzungen
 - Python 3.x
+- `can` Bibliothek für CANBUS
 - `paho-mqtt` Bibliothek für MQTT-Kommunikation
 
 ### CAN Verkabelung
@@ -76,11 +76,11 @@ Lade das Programm als ZIP-Datei von Patreon oder BuyMeaCoffee herunter und entpa
 
 ##### Öffne das Projektverzeichnis
 ```bash
-cd Feli_CAN_to_MQTT
+cd Feli_LPBA_CAN_to_MQTT
 ```
 ##### Anpassen der [Konfiguration](#konfiguration) des Programms
 ```bash
-sudo nano feli_can_to_mqtt.py
+sudo nano feli_lpba_can_to_mqtt_config.py
 ```
 Hinweis: Editor mit STRG+X beenden, dabei das Speichern nicht vergessen! „Save modified buffer?“ -> y
 
@@ -88,6 +88,11 @@ Hinweis: Editor mit STRG+X beenden, dabei das Speichern nicht vergessen! „Save
 Die [Verwendung](#verwendung) des Programmes ist nachfolgend beschrieben
 
 ## Konfiguration
+### Batterie Konfiguration
+Setze die Batterie-Nummer (falls mehrere Batterien ausgelesen werden):
+```python
+BATTERY_NUMBER = "0001"
+```
 
 ### CAN Konfiguration
 Herausfinden des angeschlossenen CAN
@@ -97,7 +102,7 @@ sudo ifconfig
 
 Setzen der CAN Schnittstelle:
 ```python
-CAN_channel = "can0"
+CAN_CHANNEL = "can0"
 ```
 
 ### MQTT Konfiguration
@@ -113,7 +118,7 @@ MQTT_PASSWORD = "12345"
 Das Skript protokolliert verschiedene Ereignisse und Fehler. Die Protokolldatei wird durch die Variable `LOG_FILE` angegeben. Setze hierfür die Protokollierungsparameter:
 ```python
 LOG_LEVEL = logging.INFO
-LOG_FILE = "/home/pi/Feli_CAN_to_MQTT/feli_can_to_mqtt.log"
+LOG_FILE = "/home/pi/Feli_LPBA_CAN_to_MQTT/feli_lpba_can_to_mqtt.log"
 ```
 #### Protokollierungsstufen
 - `DEBUG`: Detaillierte Informationen zur Diagnose von Problemen.
@@ -127,25 +132,25 @@ LOG_FILE = "/home/pi/Feli_CAN_to_MQTT/feli_can_to_mqtt.log"
 ### Ausführen des Programms
 Führe das Skript aus:
    ```bash
-   python3 feli_can_to_mqtt.py
+   python3 feli_lpba_can_to_mqtt.py
    ```
 
 ### Service einrichten
 Erstelle eine neue Service-Datei für systemd
 ```bash
-sudo nano /etc/systemd/system/feli_mqtt.service
+sudo nano /etc/systemd/system/feli_lpba_can_to_mqtt.service
 ```
 
 Füge folgenden Inhalt ein (bitte Pfad anpassen)
 ```bash
 [Unit]
-Description=CAN to MQTT Service for Felicity
+Description=CAN to MQTT Service for Felicity LPBA
 After=network.target network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/pi/Feli_CAN_to_MQTT/feli_can_to_mqtt.py
-WorkingDirectory=/home/pi/Feli_CAN_to_MQTT
+ExecStart=/usr/bin/python3 /home/pi/Feli_LPBA_CAN_to_MQTT/feli_lpba_can_to_mqtt.py
+WorkingDirectory=/home/pi/Feli_LPBA_CAN_to_MQTT
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
@@ -157,49 +162,54 @@ WantedBy=multi-user.target
 
 Aktiviere den neuen Service, sodass er beim Booten automatisch gestartet wird.
 ```bash
-sudo systemctl enable feli_mqtt.service
+sudo systemctl enable feli_lpba_can_to_mqtt.service
 ```
 
 Starte den Service
 ```bash
-sudo systemctl start feli_mqtt.service
+sudo systemctl start feli_lpba_can_to_mqtt.service
 ```
 
 ## MQTT Topics
 
-Ersetze `{Felicity_Nr}` durch die tatsächliche Speicher-Nummer in allen Topics.
+Ersetze `{BATTERY_NUMBER}` durch die tatsächliche Batterie-Nummer und `{Modul_Nr}` durch die tatsächliche Modul-Nummer in allen Topics.
 
-| Lesende Topics (Veröffentlichen)                                  | Beschreibung                       | Wert                                              |
-|-------------------------------------------------------------------|------------------------------------|---------------------------------------------------|
-| solar/felicity_battery/{Felicity_Nr}/Battery_SOC                  | Ladezustand                        | Integer (in %)                                    |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Voltage              | Spannung                           | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Current              | Strom                              | Gleitkommazahl (in Ampere)                        |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Power                | Leistung                           | Gleitkommazahl (in Watt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Temperature_01       | Temperatur Sensor 1                | Gleitkommazahl (in °C)                            |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Temperature_02       | Temperatur Sensor 2                | Gleitkommazahl (in °C)                            |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Temperature_03       | Temperatur Sensor 3                | Gleitkommazahl (in °C)                            |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Temperature_04       | Temperatur Sensor 4                | Gleitkommazahl (in °C)                            |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_01_Voltage      | Spannung Zelle 1                   | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_02_Voltage      | Spannung Zelle 2                   | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_03_Voltage      | Spannung Zelle 3                   | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_04_Voltage      | Spannung Zelle 4                   | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_05_Voltage      | Spannung Zelle 5                   | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_06_Voltage      | Spannung Zelle 6                   | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_07_Voltage      | Spannung Zelle 7                   | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_08_Voltage      | Spannung Zelle 8                   | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_09_Voltage      | Spannung Zelle 9                   | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_10_Voltage      | Spannung Zelle 10                  | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_11_Voltage      | Spannung Zelle 11                  | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_12_Voltage      | Spannung Zelle 12                  | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_13_Voltage      | Spannung Zelle 13                  | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_14_Voltage      | Spannung Zelle 14                  | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_15_Voltage      | Spannung Zelle 15                  | Gleitkommazahl (in Volt)                          |
-| solar/felicity_battery/{Felicity_Nr}/Battery_Cell_16_Voltage      | Spannung Zelle 16                  | Gleitkommazahl (in Volt)                          |
+| Basis-Topic                                               |
+|-----------------------------------------------------------|
+| solar/feli_lpba_battery/{BATTERY_NUMBER}/{Modul_Nr}/         |
 
-## HomeAssistant MQTT-Entitäten
-![HomeAssistant_Entitäten](HomeAssistant_Entitäten.jpg)
+Die vollständigen MQTT-Topics setzen sich aus dem Basis-Topic und dem jeweiligen Feldnamen zusammen.
+Beispiel: `solar/feli_lpba_battery/0001/0001/Battery_SOC`
 
-https://github.com/SuNzZeR/RPi_Feli_CAN_to_MQTT/blob/d2f333b7a8521e8aa84f5f951468f82616b98634/HA_MQTT_configuration.yaml#L1-L150
+| Feldname                     | Beschreibung                       | Wert                                              |
+|------------------------------|------------------------------------|---------------------------------------------------|
+| Battery_SOC                  | Ladezustand                        | Integer (in %)                                    |
+| -                            | -                                  | -                                                 |
+| Battery_Voltage              | Spannung                           | Gleitkommazahl (in Volt)                          |
+| Battery_Current              | Strom                              | Gleitkommazahl (in Ampere)                        |
+| Battery_Power                | Leistung                           | Gleitkommazahl (in Watt)                          |
+| -                            | -                                  | -                                                 |
+| Battery_Temperature_01       | Temperatur Sensor 1                | Gleitkommazahl (in °C)                            |
+| Battery_Temperature_02       | Temperatur Sensor 2                | Gleitkommazahl (in °C)                            |
+| Battery_Temperature_03       | Temperatur Sensor 3                | Gleitkommazahl (in °C)                            |
+| Battery_Temperature_04       | Temperatur Sensor 4                | Gleitkommazahl (in °C)                            |
+| -                            | -                                  | -                                                 |
+| Battery_Cell_01_Voltage      | Spannung Zelle 1                   | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_02_Voltage      | Spannung Zelle 2                   | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_03_Voltage      | Spannung Zelle 3                   | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_04_Voltage      | Spannung Zelle 4                   | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_05_Voltage      | Spannung Zelle 5                   | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_06_Voltage      | Spannung Zelle 6                   | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_07_Voltage      | Spannung Zelle 7                   | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_08_Voltage      | Spannung Zelle 8                   | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_09_Voltage      | Spannung Zelle 9                   | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_10_Voltage      | Spannung Zelle 10                  | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_11_Voltage      | Spannung Zelle 11                  | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_12_Voltage      | Spannung Zelle 12                  | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_13_Voltage      | Spannung Zelle 13                  | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_14_Voltage      | Spannung Zelle 14                  | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_15_Voltage      | Spannung Zelle 15                  | Gleitkommazahl (in Volt)                          |
+| Battery_Cell_16_Voltage      | Spannung Zelle 16                  | Gleitkommazahl (in Volt)                          |
 
 ## Lizenz
 Dieses Projekt ist unter der MIT-Lizenz lizenziert. Siehe die [LICENSE](LICENSE) Datei für Details.
